@@ -25,7 +25,7 @@ namespace RestWithASPNET.Services.Implementations
 
             for (int i = 0; i < 5; i++)
             {
-                PersonModel person = new PersonModel { Departament = "Teste", Email = "Teste@Teste.com", Id = '0', FirstName = "Teste", LastName = "Teste" };
+                PersonModel person = new PersonModel { Departament = "Teste", Email = "Teste@Teste.com",  FirstName = "Teste", LastName = "Teste" };
                 peapleo.Add(person);
             }
 
@@ -38,7 +38,6 @@ namespace RestWithASPNET.Services.Implementations
             return new PersonModel
             {
 
-                Id = id,
                 FirstName = "Gustavo",
                 LastName = "Nascimento",
                 Departament = "Developer",
@@ -58,7 +57,6 @@ namespace RestWithASPNET.Services.Implementations
 
             return new PersonModel
             {
-                Id = IncrementAndGet(),
                 FirstName = "Gustavo",
                 LastName = "Nascimento",
                 Email = "caous.g@gmail",

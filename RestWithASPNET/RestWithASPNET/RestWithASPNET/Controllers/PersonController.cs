@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using RestWithASPNET.Model;
 using RestWithASPNET.Services;
@@ -17,10 +18,13 @@ namespace RestWithASPNET.Controllers
 
         private readonly ILogger<PersonController> _logger;
         private IPersonService _personService;
-        public PersonController(ILogger<PersonController> logger, IPersonService personService)
+        private readonly UserManager<PersonModel> _userManager;
+
+        public PersonController(ILogger<PersonController> logger, IPersonService personService, UserManager<PersonModel> userManager)
         {
             _logger = logger;
             _personService = personService;
+            _userManager = userManager;
         }
 
         [HttpGet()]
@@ -39,10 +43,30 @@ namespace RestWithASPNET.Controllers
         }
 
         [HttpPost()]
-        public IActionResult Post([FromBody] PersonModel person)
+        public async Task<IActionResult> Post([FromBody] PersonModel person)
         {
 
-            return Ok(_personService.Create(person));
+            var user = await _userManager.FindByEmailAsync(person.Email);
+            if (user == null)
+            {
+                user = new PersonModel() {
+                    UserName = person.UserName,
+                    Email = person.Email,
+                    PasswordHash = person.PasswordHash,
+                    FirstName = person.FirstName,
+                    LastName = person.LastName,
+                    Departament = person.Departament
+                };
+
+                var result = await _userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    return Ok("Criou com sucesso");
+                }
+            }
+            return BadRequest("Ouve um erro na API");
+
+            //return Ok(_personService.Create(person));
         }
 
         [HttpPut()]

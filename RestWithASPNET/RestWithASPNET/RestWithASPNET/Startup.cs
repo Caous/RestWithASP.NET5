@@ -1,17 +1,21 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using RestWithASPNET.Model;
 using RestWithASPNET.Services;
 using RestWithASPNET.Services.Implementations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace RestWithASPNET
@@ -30,7 +34,25 @@ namespace RestWithASPNET
         {
 
             services.AddControllers();
+
+            string connectionString = @"Integrated Security=SSPI;Persist Security Info=False;Initial Catalog=bdPOCWEBAPI;Data Source=DSK-GUSTAVO";
+
+            var migrationAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+
+            services.AddDbContext<DbContext>(opt => opt.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationAssembly)));
+
+            services.AddIdentity<PersonModel, IdentityRole>(options =>
+            {
+                options.SignIn.RequireConfirmedEmail = true;
+                options.Password.RequireDigit = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequiredLength = 3;
+            }).AddEntityFrameworkStores<DbContext>();
+
             services.AddScoped<IPersonService, PersonServiceImplementation>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "RestWithASPNET", Version = "v1" });
