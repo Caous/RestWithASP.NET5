@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace RestWithASPNET.Model
 {
-    public class PersonModel : IdentityUser
+    public class Person : IdentityUser<int>
     {
-       
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Departament { get; set; }

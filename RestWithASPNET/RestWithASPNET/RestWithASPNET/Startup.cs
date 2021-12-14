@@ -9,9 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using RestWithASPNET.Interfaces;
 using RestWithASPNET.Model;
 using RestWithASPNET.Services;
-using RestWithASPNET.Services.Implementations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,23 +35,28 @@ namespace RestWithASPNET
 
             services.AddControllers();
 
-            string connectionString = @"Integrated Security=SSPI;Persist Security Info=False;Initial Catalog=bdPOCWEBAPI;Data Source=DSK-GUSTAVO";
+            var serverVersion = new MySqlServerVersion(new Version(8, 0, 27));
 
-            var migrationAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+            services.AddDbContext<DbContext>(opt => opt.UseMySql(Configuration.GetConnectionString("DefaultConnnection"), serverVersion));
 
-            services.AddDbContext<DbContext>(opt => opt.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationAssembly)));
+            services.AddScoped<IPersonRepository, PersonRepository>();
 
-            services.AddIdentity<PersonModel, IdentityRole>(options =>
+            services.AddIdentity<Person, Role>(options =>
             {
-                options.SignIn.RequireConfirmedEmail = true;
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedAccount = false;
+                options.Lockout.AllowedForNewUsers = false;
                 options.Password.RequireDigit = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequiredLength = 3;
-            }).AddEntityFrameworkStores<DbContext>();
+            }).AddEntityFrameworkStores<DbContext>()
+              .AddRoleValidator<RoleValidator<Role>>()
+              .AddRoleValidator<RoleValidator<Role>>()
+              .AddRoleManager<RoleManager<Role>>()
+              .AddSignInManager<SignInManager<Person>>();
 
-            services.AddScoped<IPersonService, PersonServiceImplementation>();
 
             services.AddSwaggerGen(c =>
             {

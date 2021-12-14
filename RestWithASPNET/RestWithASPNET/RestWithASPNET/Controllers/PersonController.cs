@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using RestWithASPNET.Dto;
+using RestWithASPNET.Interfaces;
 using RestWithASPNET.Model;
-using RestWithASPNET.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace RestWithASPNET.Controllers
@@ -17,76 +17,137 @@ namespace RestWithASPNET.Controllers
 
 
         private readonly ILogger<PersonController> _logger;
-        private IPersonService _personService;
-        private readonly UserManager<PersonModel> _userManager;
+        private IPersonRepository _personRepository;
+        private readonly UserManager<Person> _userManager;
+        public SignInManager<Person> _signInManager;
 
-        public PersonController(ILogger<PersonController> logger, IPersonService personService, UserManager<PersonModel> userManager)
+        public PersonController(ILogger<PersonController> logger, IPersonRepository personRepository, UserManager<Person> userManager, SignInManager<Person> signInManager)
         {
             _logger = logger;
-            _personService = personService;
+            _personRepository = personRepository;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         [HttpGet()]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-
-            return Ok(_personService.FindAll());
+            
+            return Ok(await _personRepository.GetAllPeople());
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByIdAsync(id.ToString());
+                if (user != null)
+                {
+                    return Ok(user);
+                }
+                else
+                {
+                    return NotFound("User not found");
+                }
 
-            return Ok(_personService.FindById(id));
+            }
+            return BadRequest("Id not found");
 
         }
 
         [HttpPost()]
-        public async Task<IActionResult> Post([FromBody] PersonModel person)
+        public async Task<IActionResult> Post([FromBody] PersonDto person)
         {
-
-            var user = await _userManager.FindByEmailAsync(person.Email);
-            if (user == null)
+            if (ModelState.IsValid)
             {
-                user = new PersonModel() {
-                    UserName = person.UserName,
-                    Email = person.Email,
-                    PasswordHash = person.PasswordHash,
-                    FirstName = person.FirstName,
-                    LastName = person.LastName,
-                    Departament = person.Departament
-                };
-
-                var result = await _userManager.CreateAsync(user);
-                if (result.Succeeded)
+                var user = await _userManager.FindByEmailAsync(person.Email);
+                if (user == null)
                 {
-                    return Ok("Criou com sucesso");
-                }
-            }
-            return BadRequest("Ouve um erro na API");
+                    user = new Person()
+                    {
+                        UserName = person.UserName,
+                        Email = person.Email,
+                        PasswordHash = person.Password,
+                        FirstName = person.FirstName,
+                        LastName = person.LastName,
+                        Departament = person.Departament
+                    };
 
-            //return Ok(_personService.Create(person));
+                    var result = await _userManager.CreateAsync(user,person.Password);
+
+                    if (result.Succeeded)
+                    {
+                        user = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == person.Email);
+                        return Ok(user);
+                    }
+                }
+                return BadRequest("User exists");
+            }
+            return BadRequest("Parameter not found");
+
         }
 
         [HttpPut()]
-        public IActionResult Put([FromBody] PersonModel person)
+        public async Task<IActionResult> Put([FromBody] PersonDto person)
         {
 
-            return Ok(_personService.Update(person));
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(person.Email);
+
+                if (user != null)
+                {
+                    var resultLogin = await _signInManager.CheckPasswordSignInAsync(user, person.Password, false);
+                    if (resultLogin.Succeeded)
+                    {
+                        user.UserName = person.UserName;
+                        user.Email = person.Email;
+                        user.FirstName = person.FirstName;
+                        user.LastName = person.LastName;
+                        user.Departament = person.Departament;
+
+
+                        var result = await _userManager.UpdateAsync(user);
+
+                        if (result.Succeeded)
+                        {
+                            user = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == person.Email);
+                            return Ok(user);
+                        }
+                    }
+                    else { NotFound("Password not checked"); }
+
+                }
+                return BadRequest("User exists or E-mail Incorreted");
+            }
+            return BadRequest("Ouve um erro na API");
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            _personService.Delete(id);
-            return Ok("Delete Sucess");
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByIdAsync(id.ToString());
+                if (user != null)
+                {
+                    var result = await _userManager.DeleteAsync(user);
+
+                    if (result.Succeeded)
+                        return Ok("Deleted with successed");
+
+                }
+                return NotFound("User not found");
+            }
+            return BadRequest("Ouve um erro na API");
         }
 
 
-        private bool IsNumber(string input) {
+        private bool IsNumber(string input)
+        {
 
-            
+
             try
             {
                 int valor = Convert.ToInt32(input);
