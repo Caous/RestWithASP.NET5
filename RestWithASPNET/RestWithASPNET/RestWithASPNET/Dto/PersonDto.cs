@@ -18,5 +18,8 @@ namespace RestWithASPNET.Dto
         public string Departament { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public int DepartamentId { get; set; }
+
+        
     }
 }

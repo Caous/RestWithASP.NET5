@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RestWithASPNET;
 
 namespace RestWithASPNET.Migrations
 {
     [DbContext(typeof(DbContext))]
-    partial class DbContextModelSnapshot : ModelSnapshot
+    [Migration("20211215161643_DepartamentTable")]
+    partial class DepartamentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,8 +143,10 @@ namespace RestWithASPNET.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<int>("DepartamentId")
-                        .HasColumnType("int")
-                        .HasColumnName("DepartamentId");
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DepartamentIdDepartament")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("DtExclused")
                         .HasColumnType("datetime(6)");
@@ -202,6 +206,8 @@ namespace RestWithASPNET.Migrations
                         .HasName("PK_Persons");
 
                     b.HasIndex("DepartamentId");
+
+                    b.HasIndex("DepartamentIdDepartament");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -303,11 +309,13 @@ namespace RestWithASPNET.Migrations
 
             modelBuilder.Entity("RestWithASPNET.Model.Person", b =>
                 {
-                    b.HasOne("RestWithASPNET.Model.Departament", "Departament")
+                    b.HasOne("RestWithASPNET.Model.Departament", null)
                         .WithMany()
                         .HasForeignKey("DepartamentId");
 
-                    b.Navigation("Departament");
+                    b.HasOne("RestWithASPNET.Model.Departament", null)
+                        .WithMany("Persons")
+                        .HasForeignKey("DepartamentIdDepartament");
                 });
 
             modelBuilder.Entity("RestWithASPNET.Model.UserRole", b =>
@@ -335,6 +343,11 @@ namespace RestWithASPNET.Migrations
                     b.Navigation("Person");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("RestWithASPNET.Model.Departament", b =>
+                {
+                    b.Navigation("Persons");
                 });
 
             modelBuilder.Entity("RestWithASPNET.Model.Role", b =>

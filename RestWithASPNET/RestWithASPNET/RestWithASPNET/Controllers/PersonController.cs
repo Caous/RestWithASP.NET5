@@ -10,8 +10,9 @@ using System.Threading.Tasks;
 
 namespace RestWithASPNET.Controllers
 {
+    [ApiVersion("1")]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class PersonController : ControllerBase
     {
 
@@ -71,7 +72,8 @@ namespace RestWithASPNET.Controllers
                         PasswordHash = person.Password,
                         FirstName = person.FirstName,
                         LastName = person.LastName,
-                        Departament = person.Departament
+                        DepartamentId = person.DepartamentId
+                        //Departament = person.Departament
                     };
 
                     var result = await _userManager.CreateAsync(user,person.Password);
@@ -105,7 +107,8 @@ namespace RestWithASPNET.Controllers
                         user.Email = person.Email;
                         user.FirstName = person.FirstName;
                         user.LastName = person.LastName;
-                        user.Departament = person.Departament;
+                        user.DepartamentId = person.DepartamentId;
+                        //user.Departament. = person.Departament;
 
 
                         var result = await _userManager.UpdateAsync(user);

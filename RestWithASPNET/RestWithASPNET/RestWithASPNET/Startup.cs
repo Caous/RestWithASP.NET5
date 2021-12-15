@@ -35,11 +35,14 @@ namespace RestWithASPNET
 
             services.AddControllers();
 
-            var serverVersion = new MySqlServerVersion(new Version(8, 0, 27));
+            MySqlServerVersion serverVersion = new MySqlServerVersion(new Version(8, 0, 27));
 
             services.AddDbContext<DbContext>(opt => opt.UseMySql(Configuration.GetConnectionString("DefaultConnnection"), serverVersion));
 
+            services.AddApiVersioning();
+            
             services.AddScoped<IPersonRepository, PersonRepository>();
+            services.AddScoped<IDepartamentRepository, DepartamentRepository>();
 
             services.AddIdentity<Person, Role>(options =>
             {

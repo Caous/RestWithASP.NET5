@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace RestWithASPNET.Model
 {
-    public class Person : IdentityUser<int>
+    public class Departament
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public int DepartamentId { get; set; }
-
+        [Key]
+        public int IdDepartament { get; set; }
+        public string NameDepartament { get; set; }
+        public string DesDepartament { get; set; }
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime DtInclused { get; set; }
@@ -20,11 +19,5 @@ namespace RestWithASPNET.Model
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime? DtExclused { get; set; }
 
-        public Departament Departament { get; set; }
-
     }
-
-
-
-
 }

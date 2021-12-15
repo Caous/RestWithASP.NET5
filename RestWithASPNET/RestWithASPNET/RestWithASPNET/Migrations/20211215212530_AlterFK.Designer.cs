@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RestWithASPNET;
 
 namespace RestWithASPNET.Migrations
 {
     [DbContext(typeof(DbContext))]
-    partial class DbContextModelSnapshot : ModelSnapshot
+    [Migration("20211215212530_AlterFK")]
+    partial class AlterFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,8 +143,7 @@ namespace RestWithASPNET.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<int>("DepartamentId")
-                        .HasColumnType("int")
-                        .HasColumnName("DepartamentId");
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("DtExclused")
                         .HasColumnType("datetime(6)");
@@ -303,11 +304,9 @@ namespace RestWithASPNET.Migrations
 
             modelBuilder.Entity("RestWithASPNET.Model.Person", b =>
                 {
-                    b.HasOne("RestWithASPNET.Model.Departament", "Departament")
-                        .WithMany()
+                    b.HasOne("RestWithASPNET.Model.Departament", null)
+                        .WithMany("Persons")
                         .HasForeignKey("DepartamentId");
-
-                    b.Navigation("Departament");
                 });
 
             modelBuilder.Entity("RestWithASPNET.Model.UserRole", b =>
@@ -335,6 +334,11 @@ namespace RestWithASPNET.Migrations
                     b.Navigation("Person");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("RestWithASPNET.Model.Departament", b =>
+                {
+                    b.Navigation("Persons");
                 });
 
             modelBuilder.Entity("RestWithASPNET.Model.Role", b =>

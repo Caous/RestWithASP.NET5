@@ -18,7 +18,7 @@ namespace RestWithASPNET.Services
         }
         public async Task<IEnumerable<Person>> GetAllPeople()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users.Include(d => d.Departament).ToListAsync();
         }
     }
 }
